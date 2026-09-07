@@ -21,8 +21,12 @@ window.__ENV__ = {
 `;
 
 try {
-  fs.writeFileSync(path.join(__dirname, 'config.js'), configContent, 'utf8');
-  console.log('🔒 [ATRIL Security] Runtime configuration generated securely from environment.');
+  const targetDir = path.join(__dirname, '..', 'src', 'js');
+  if (!fs.existsSync(targetDir)) {
+    fs.mkdirSync(targetDir, { recursive: true });
+  }
+  fs.writeFileSync(path.join(targetDir, 'config.js'), configContent, 'utf8');
+  console.log('🔒 [ATRIL Security] Runtime configuration generated securely at src/js/config.js.');
 } catch (err) {
   console.error('❌ [ATRIL Security] Error generating runtime configuration:', err);
   process.exit(1);

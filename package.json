@@ -1,0 +1,23 @@
+{
+  "name": "atril-webapp",
+  "version": "5.0.0",
+  "description": "Sistema Integral de Gestión Docente, Declaración Jurada Ley 3416/77 y Matriz de Calificaciones",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build.js",
+    "check": "node --check src/js/app.js",
+    "test": "node --check src/js/app.js"
+  },
+  "keywords": [
+    "education",
+    "management",
+    "supabase",
+    "postgresql",
+    "realtime",
+    "saas",
+    "gradebook",
+    "jujuy"
+  ],
+  "author": "artssoria",
+  "license": "UNLICENSED"
+}

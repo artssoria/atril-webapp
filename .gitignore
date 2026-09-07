@@ -10,7 +10,10 @@
 .env.test.local
 .env.production.local
 config.js
+src/js/config.js
+**/config.js
 env.js
+**/env.js
 
 # 2. Agentes de IA, Skills y Personalizaciones Internas
 .agents/

@@ -21,6 +21,43 @@ Integra las regulaciones provinciales de la Provincia de Jujuy y marcos pedagóg
 
 ---
 
+## 📂 Estructura del Proyecto
+
+```
+atril-webapp/
+├── .github/                                   # Automatización y flujos de trabajo
+│   ├── workflows/
+│   │   └── ci.yml                             # Validación continua de sintaxis y build
+│   └── ISSUE_TEMPLATE/                        # Plantillas para reportes y sugerencias
+├── scripts/
+│   └── build.js                               # Generador seguro de configuración para despliegue
+├── src/
+│   ├── css/
+│   │   └── style.css                          # Sistema de diseño SaaS y scrollbars ergonómicas
+│   ├── gas/
+│   │   └── Code.gs                            # Backend Google Apps Script (integraciones)
+│   └── js/
+│       ├── app.js                             # Motor reactivo y sincronización Supabase 5.0
+│       ├── config.example.js                  # Plantilla de configuración local
+│       └── config.js                          # Configuración local activa (ignorado por Git)
+├── supabase/
+│   ├── config.toml                            # Configuración local de Supabase CLI
+│   ├── schema.sql                             # Esquema DDL relacional y políticas RLS
+│   └── migrations/
+│       └── 20260907_atril_schema.sql          # Migración versionada
+├── .editorconfig                              # Estándar de formateo y codificación
+├── .env.example                               # Plantilla de variables de entorno
+├── .gitignore                                 # Reglas de protección de secretos y agentes
+├── index.html                                 # Punto de entrada de la aplicación
+├── jsconfig.json                              # Configuración de TypeScript/JS para IDE
+├── LICENSE                                    # Licencia y derechos de autor
+├── netlify.toml                               # Cabeceras de seguridad CSP, HSTS y redirecciones
+├── package.json                               # Manifiesto y scripts de ejecución
+└── README.md                                  # Documentación técnica integral
+```
+
+---
+
 ## ⚡ Características Principales
 
 ### 1. Gestión de Aulas y Estudiantes
@@ -56,7 +93,7 @@ Integra las regulaciones provinciales de la Provincia de Jujuy y marcos pedagóg
 | **Base de Datos** | **Supabase PostgreSQL 17** | Base de datos relacional con almacenamiento JSONB y tablas normalizadas. |
 | **Sincronización en Vivo** | **Supabase Realtime (`postgres_changes`)** | Replicación multi-dispositivo instantánea mediante WebSockets bidireccionales. |
 | **Persistencia Local** | `localStorage` + In-Memory Reactive State | Operación 100% offline garantizada. |
-| **Aislamiento de Entorno** | Variables de entorno en build (`build.js`) + `.env.example` | Credenciales protegidas mediante `.gitignore`; nunca expuestas en GitHub. |
+| **Aislamiento de Entorno** | Variables de entorno en build (`scripts/build.js`) + `.env.example` | Credenciales protegidas mediante `.gitignore`; nunca expuestas en GitHub. |
 | **Seguridad HTTP** | Netlify Security Headers (CSP, HSTS, X-Frame-Options: DENY) | Prevención estricta de ataques XSS, Clickjacking y exfiltración. |
 
 ---
@@ -129,19 +166,19 @@ erDiagram
 
 ### 1. Variables de Entorno y Configuración Local
 Para correr el proyecto localmente sin exponer credenciales:
-1. Copia `config.example.js` a `config.js` (o `.env.example` a `.env`):
+1. Copia `src/js/config.example.js` a `src/js/config.js` (o `.env.example` a `.env`):
    ```bash
-   cp config.example.js config.js
+   cp src/js/config.example.js src/js/config.js
    ```
-2. Completa tus credenciales de Supabase en `config.js`.
-3. `config.js` y `.env` están agregados a `.gitignore` y **nunca se subirán a GitHub**.
+2. Completa tus credenciales de Supabase en `src/js/config.js`.
+3. `src/js/config.js` y `.env` están agregados a `.gitignore` y **nunca se subirán a GitHub**.
 
 ### 2. Despliegue en Netlify
 1. Conectar el repositorio en [Netlify](https://app.netlify.com).
 2. En Netlify, ir a **Site configuration > Environment variables** y agregar:
    - `SUPABASE_URL`: `https://tu-proyecto.supabase.co`
    - `SUPABASE_ANON_KEY`: `tu-clave-anon-publica`
-3. Netlify ejecutará automáticamente `node build.js` (definido en `netlify.toml`), inyectando de forma segura las variables en el momento del despliegue sin dejar rastro de claves en el repositorio público.
+3. Netlify ejecutará automáticamente `node scripts/build.js` (definido en `netlify.toml`), inyectando de forma segura las variables en el momento del despliegue sin dejar rastro de claves en el repositorio público.
 
 ### 3. Base de Datos en Supabase
 Ejecutar el script [supabase/schema.sql](file:///supabase/schema.sql) en el SQL Editor de tu proyecto Supabase o mediante CLI:
@@ -155,7 +192,7 @@ npx.cmd supabase db push
 
 ## 🔒 Buenas Prácticas de Seguridad Implementadas
 
-1. **Aislamiento de Secretos:** `.agents/`, `.env*`, `config.js` y `skills-lock.json` están excluidos del control de versiones.
+1. **Aislamiento de Secretos:** `.agents/`, `.env*`, `src/js/config.js` y `skills-lock.json` están excluidos del control de versiones.
 2. **Políticas RLS en PostgreSQL:** Row Level Security activado en todas las tablas del sistema.
 3. **Encabezados HTTP Estrictos:**
    - `Content-Security-Policy`: Limita la ejecución de scripts y conexiones solo a orígenes autorizados.
