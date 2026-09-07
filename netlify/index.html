@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#091A1D">
+<meta name="description" content="Atril 5.0 · Sistema Integral de Gestión Docente, Declaración Jurada Ley 3416/77, Licencias Dec. 561/71 y Estatuto Docente">
+<title>Atril 5.0 · Gestión Docente & Normativa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230C6B5D' stroke-width='2.2'><path d='M4 6h16l-2 4H6L4 6z'/><path d='M12 10v8'/><path d='M7 21l5-3 5 3'/></svg>">
+<link rel="stylesheet" href="style.css?v=4.0">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.mini.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<!-- Supabase PostgreSQL & Realtime JS SDK v2 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<!-- Loader Global para Inicialización -->
+<div id="loading" class="global-loader">
+  <div class="spinner"></div>
+  <span id="loading-text">Cargando aula…</span>
+</div>
+
+<div class="app-container">
+
+  <!-- ══════════ PANTALLA: LOGIN / AUTH ══════════ -->
+  <section id="login" class="screen active" style="width:100%">
+    <div class="auth-wrap">
+      <div class="row" style="gap:12px;margin-bottom:18px">
+        <div class="av" style="background:linear-gradient(135deg,var(--teal),#10947f);border-radius:12px">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16l-2 4H6L4 6z"/><path d="M12 10v8"/><path d="M7 21l5-3 5 3"/></svg>
+        </div>
+        <div>
+          <b style="font:800 22px 'Sora';letter-spacing:-0.02em">Atril<span style="color:var(--amber)">.</span></b>
+          <small style="display:block;color:var(--ink2);font-weight:600">Gestión Docente SaaS v3.1</small>
+        </div>
+      </div>
+
+      <h1 class="auth-h1" id="auth-title">Ingresá a tu aula</h1>
+      <p class="auth-sub" id="auth-sub">Conectá con Google Sheets y gestioná tus cursos colaborativamente.</p>
+
+      <div class="seg" id="auth-mode" style="margin-bottom:18px">
+        <button data-mode="login" class="on">Ingresar</button>
+        <button data-mode="register">Crear cuenta</button>
+      </div>
+
+      <div id="auth-form">
+        <label class="lbl" id="au-nombre-lbl" style="display:none">Nombre y apellido</label>
+        <input type="text" id="au-nombre" placeholder="Ej: Laura Méndez" autocomplete="name" style="display:none">
+        <label class="lbl">Email docente</label>
+        <input type="email" id="au-email" placeholder="tu@escuela.edu" autocomplete="email">
+        <label class="lbl">Contraseña</label>
+        <input type="password" id="au-pass" placeholder="••••••••" autocomplete="current-password" minlength="4">
+        <label class="lbl" id="au-rol-lbl" style="display:none">Rol docente</label>
+        <select id="au-rol" style="display:none">
+          <option>Docente titular</option>
+          <option>Docente co-titular</option>
+          <option>Coordinación / Jefatura</option>
+        </select>
+        <div style="margin-top:22px">
+          <button class="btn btn-p btn-block" id="au-submit">Continuar →</button>
+        </div>
+      </div>
+
+      <p style="margin-top:20px;text-align:center">
+        <button class="btn btn-ghost btn-sm no-print" id="demo-btn">🧪 Entrar al aula docente</button>
+      </p>
+    </div>
+  </section>
+
+  <!-- ══════════ PANTALLA: ONBOARDING INICIAL ══════════ -->
+  <section id="onboarding" class="screen" style="width:100%">
+    <div class="auth-wrap" style="max-width:480px">
+      <div class="row" style="gap:12px;margin-bottom:14px">
+        <div class="av" style="background:linear-gradient(135deg,var(--teal),#10947f);border-radius:12px">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16l-2 4H6L4 6z"/><path d="M12 10v8"/><path d="M7 21l5-3 5 3"/></svg>
+        </div>
+        <b>Atril<span style="color:var(--amber)">.</span></b>
+      </div>
+      <div class="ob-dots"><i class="on"></i><i></i><i></i></div>
+
+      <div class="ob-step on" id="ob-1">
+        <h1>Tu aula,<br>en un solo lugar.</h1>
+        <p class="sub">Estudiantes, calificaciones, asistencia e informes compartidos entre docentes.</p>
+        <label class="lbl">Tu nombre completo</label>
+        <input type="text" id="ob-nombre" placeholder="Ej: Laura Méndez" autocomplete="name">
+        <label class="lbl">Tu rol en la institución</label>
+        <select id="ob-rol">
+          <option>Docente titular</option>
+          <option>Docente co-titular</option>
+          <option>Coordinación / Jefatura</option>
+        </select>
+        <div style="margin-top:22px"><button class="btn btn-p btn-block" data-step="2">Continuar →</button></div>
+      </div>
+
+      <div class="ob-step" id="ob-2">
+        <h1>¿Qué materia vas a dictar?</h1>
+        <p class="sub">Configurá el nivel y la escala de calificación oficial de tu curso.</p>
+        <label class="lbl">Nivel educativo</label>
+        <div class="seg" id="ob-niveles" style="margin-bottom:12px">
+          <button type="button" data-nivel="Primaria">Primaria</button>
+          <button type="button" data-nivel="Secundaria" class="on">Secundaria</button>
+          <button type="button" data-nivel="Superior">Superior</button>
+        </div>
+        <label class="lbl">Nombre de la materia / espacio</label>
+        <input type="text" id="ob-materia" placeholder="Ej: Matemáticas">
+        <label class="lbl">Curso / División (ej. 3.º B)</label>
+        <input type="text" id="ob-curso" placeholder="Ej: 3.º B">
+        <label class="lbl">Escala de calificación</label>
+        <select id="ob-escala">
+          <option value="10">1 a 10 (aprueba con 6)</option>
+          <option value="100">1 a 100 (aprueba con 60)</option>
+          <option value="7">1 a 7 (aprueba con 4)</option>
+        </select>
+        <div class="row" style="margin-top:22px;gap:10px">
+          <button class="btn btn-s" data-step="1" style="flex:1">←</button>
+          <button class="btn btn-p" data-step="3" style="flex:3">Continuar →</button>
+        </div>
+      </div>
+
+      <div class="ob-step" id="ob-3">
+        <h1>¿Compartís notas con otros docentes?</h1>
+        <p class="sub">Podés sumar docentes de tu equipo para construir notas compartidas con ponderaciones.</p>
+        <label class="lbl">Docente co-titular 1 (opcional)</label>
+        <input type="text" id="ob-doc1" placeholder="Ej: Diego Ruiz">
+        <label class="lbl">Docente co-titular 2 (opcional)</label>
+        <input type="text" id="ob-doc2" placeholder="Ej: Sofía Herrera">
+        <div class="row" style="margin-top:22px;gap:10px">
+          <button class="btn btn-s" data-step="2" style="flex:1">←</button>
+          <button class="btn btn-p" id="ob-fin" style="flex:3">Entrar a mi aula ✦</button>
+        </div>
+        <p style="text-align:center;margin-top:14px"><button class="btn btn-ghost btn-sm" id="ob-skip">Omitir por ahora</button></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ APP PRINCIPAL (DESKTOP & MOBILE SHELL) ══════════ -->
+  <div id="main">
+
+    <!-- SIDEBAR DE ESCRITORIO -->
+    <aside class="desktop-sidebar no-print">
+      <div class="sidebar-brand">
+        <div class="mark">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16l-2 4H6L4 6z"/><path d="M12 10v8"/><path d="M7 21l5-3 5 3"/></svg>
+        </div>
+        <b>Atril<span>.</span></b>
+        <span class="ver-tag" style="background:var(--amber);color:#2a1b00;font-weight:800">v4.0</span>
+      </div>
+
+      <!-- Tarjeta de Curso Activo -->
+      <div class="sidebar-course-card" id="sb-course-card" title="Hacé clic para cambiar o crear materias">
+        <div class="scc-label"><span>Materia Activa</span> ▾</div>
+        <div class="scc-name" id="sb-materia-nombre">Cargando…</div>
+        <div class="scc-meta" id="sb-materia-meta">División · Escala 1-10</div>
+      </div>
+
+      <!-- Menú de Navegación -->
+      <nav class="sidebar-nav">
+        <div class="nav-section-lbl">GESTIÓN DE CURSOS</div>
+        <button class="sidebar-link on" data-nav="inicio">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/></svg>
+          Inicio
+          <span class="shortcut-key">1</span>
+        </button>
+        <button class="sidebar-link" data-nav="alumnos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M15.5 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Estudiantes
+          <span class="shortcut-key">2</span>
+        </button>
+        <button class="sidebar-link" data-nav="notas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 2h6v4H9z"/><path d="M9 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-4"/><path d="M9 14l2 2 4-4"/></svg>
+          Calificaciones
+          <span class="shortcut-key">3</span>
+        </button>
+        <button class="sidebar-link" data-nav="asistencia">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          Asistencia
+          <span class="shortcut-key">4</span>
+        </button>
+        <button class="sidebar-link" data-nav="informes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+          Informes & PDF
+          <span class="shortcut-key">5</span>
+        </button>
+
+        <div class="nav-section-lbl" style="margin-top:14px">LEGISLACIÓN Y TRÁMITES</div>
+        <button class="sidebar-link" data-nav="ddjj" id="nav-ddjj-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Declaración Jurada
+          <span class="shortcut-key">7</span>
+        </button>
+        <button class="sidebar-link" data-nav="licencias" id="nav-licencias-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+          Régimen Licencias
+          <span class="shortcut-key">8</span>
+        </button>
+        <button class="sidebar-link" data-nav="estatuto" id="nav-estatuto-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Estatuto & Puntaje
+          <span class="shortcut-key">9</span>
+        </button>
+
+        <div class="nav-section-lbl" style="margin-top:14px">INSTITUCIONAL</div>
+        <button class="sidebar-link" data-nav="equipo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Equipo Docente
+          <span class="shortcut-key">6</span>
+        </button>
+      </nav>
+
+      <!-- Pie del Sidebar: Tema y Usuario -->
+      <div class="sidebar-footer">
+        <button class="theme-switch-btn" id="btn-toggle-theme" title="Alternar entre modo oscuro y claro">
+          <span id="theme-btn-label">🌙 Modo Oscuro</span>
+          <span class="shortcut-key">T</span>
+        </button>
+        <div class="sidebar-user-row" data-nav="equipo" id="sb-user-card" title="Ver perfil institucional">
+          <span class="av av-s" id="sb-user-avatar">D</span>
+          <div class="sidebar-user-info">
+            <h5 id="sb-user-name">Docente</h5>
+            <small id="sb-user-role">Titular</small>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ÁREA DE TRABAJO PRINCIPAL -->
+    <div class="desktop-workspace">
+
+      <!-- TOPBAR DE ESCRITORIO -->
+      <header class="desktop-topbar no-print">
+        <div class="dt-left">
+          <div class="dt-breadcrumb">
+            <span id="dt-page-title">Inicio</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg>
+            <b id="dt-course-title">Materia</b>
+          </div>
+          <button class="cmd-palette-btn" id="btn-open-cmd" title="Abrir paleta de comandos rápida">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <span>Buscar estudiante, docente o comando…</span>
+            <kbd>Ctrl K</kbd>
+          </button>
+        </div>
+
+        <div class="dt-right">
+          <!-- Píldora de Sincronización en tiempo real -->
+          <div class="sync-pill" id="sync-pill" title="Hacé clic para forzar sincronización con Google Sheets">
+            <span class="sync-dot"></span>
+            <span id="sync-pill-text">Local</span>
+          </div>
+
+          <button class="btn btn-s btn-sm" data-action="nuevo-al">＋ Estudiante</button>
+          <button class="btn btn-p btn-sm" data-action="nueva-ev">＋ Evaluación</button>
+        </div>
+      </header>
+
+      <!-- TOPBAR MÓVIL (<900px) -->
+      <header class="mobile-topbar no-print">
+        <div class="row" style="gap:10px">
+          <div class="mark">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 6h16l-2 4H6L4 6z"/><path d="M12 10v8"/><path d="M7 21l5-3 5 3"/></svg>
+          </div>
+          <div>
+            <b>Atril<span>.</span></b>
+            <button class="course-switcher" id="btn-mobile-cambiar-curso" style="display:block;margin-top:2px;font-size:11px;padding:2px 8px">
+              <span id="in-materia-badge">Materia</span> ▾
+            </button>
+          </div>
+        </div>
+        <div class="row" style="gap:8px">
+          <div class="sync-pill" id="mobile-sync-pill" style="padding:4px 10px;font-size:11px">
+            <span class="sync-dot"></span>
+          </div>
+          <button class="icon-btn btn-sm" id="mobile-theme-toggle" title="Cambiar tema">🌓</button>
+          <button class="icon-btn btn-sm" id="mobile-avatar" data-nav="equipo"></button>
+        </div>
+      </header>
+
+      <!-- CONTENIDO DE LAS PANTALLAS -->
+      <main class="workspace-content">
+
+        <!-- ══════════ PANTALLA: INICIO (DASHBOARD) ══════════ -->
+        <section class="screen active" id="screen-inicio">
+          <div class="card-header">
+            <div>
+              <p style="font-size:13px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:0.08em" id="in-fecha"></p>
+              <h1 style="font-size:28px;font-weight:800;margin-top:4px" id="in-hola">¡Hola, Docente!</h1>
+            </div>
+            <div class="row no-print" style="gap:10px">
+              <button class="btn btn-s btn-sm" data-action="todos-p">✓ Pase de lista rápido</button>
+              <button class="btn btn-p btn-sm" data-action="nueva-ev">＋ Nueva evaluación</button>
+            </div>
+          </div>
+
+          <!-- Grid de Métricas KPI -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-icon teal">🎓</div>
+              <div class="kpi-data">
+                <b id="st-alu">0</b>
+                <span>Estudiantes</span>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon amber">📊</div>
+              <div class="kpi-data">
+                <b id="st-prom">—</b>
+                <span>Promedio General</span>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon blue">📅</div>
+              <div class="kpi-data">
+                <b id="st-asist">—</b>
+                <span>Asistencia de Hoy</span>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon purple">📝</div>
+              <div class="kpi-data">
+                <b id="st-evs-count">0</b>
+                <span>Evaluaciones</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Radar de Alumnos en Riesgo Pedagógico -->
+          <div id="in-radar-wrap"></div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px">
+            <!-- Evaluaciones Recientes -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">📝 Evaluaciones Recientes</div>
+                <button class="btn btn-ghost btn-xs" data-nav="notas">Ver todas →</button>
+              </div>
+              <div class="list" id="in-evs"></div>
+            </div>
+
+            <!-- Distribución de Calificaciones -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">📊 Rendimiento del Curso</div>
+                <button class="btn btn-ghost btn-xs" data-nav="informes">Informe completo →</button>
+              </div>
+              <div id="in-dist-wrap"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════ PANTALLA: ESTUDIANTES (MASTER-DETAIL SPLIT) ══════════ -->
+        <section class="screen" id="screen-alumnos">
+          <div class="card-header">
+            <div>
+              <h1 style="font-size:26px;font-weight:800">Nómina de Estudiantes</h1>
+              <p style="color:var(--ink2);font-size:14px;margin-top:2px" id="al-sub">Registro pedagógico, contacto directo con tutores y calificaciones.</p>
+            </div>
+            <div class="row no-print" style="gap:8px">
+              <button class="btn btn-p btn-sm" data-action="nuevo-al">＋ Estudiante</button>
+              <button class="btn btn-s btn-sm" id="btn-abrir-importar">📥 Importar Excel / CSV</button>
+              <button class="btn btn-danger btn-sm" id="btn-abrir-borrar-todo">🗑 Vaciar</button>
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px 18px;margin-bottom:16px">
+            <div class="row" style="gap:12px;flex-wrap:wrap">
+              <div class="search-wrap grow">
+                <input type="text" id="buscar" placeholder="🔍  Buscar por nombre, teléfono, email u observaciones…">
+                <button class="search-clear" id="buscar-clear">✕</button>
+              </div>
+              <div class="sort-bar" id="al-sort-bar">
+                <button class="sort-chip on" data-sort="az">A-Z Nombre</button>
+                <button class="sort-chip" data-sort="za">Z-A</button>
+                <button class="sort-chip" data-sort="promedio">Mejor Promedio</button>
+                <button class="sort-chip" data-sort="asistencia">Mayor Asistencia</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Master-Detail Split Grid -->
+          <div class="master-detail-grid">
+            <div class="list" id="lista-alumnos"></div>
+            <div class="student-dossier-card" id="student-dossier-panel">
+              <div class="empty" style="padding:40px 20px">
+                <div style="font-size:36px;margin-bottom:10px">👈</div>
+                <h4>Seleccioná un estudiante</h4>
+                <p style="font-size:13px;color:var(--ink2);margin-top:4px">Hacé clic en cualquier alumno de la lista para ver su ficha pedagógica, historial y botones directos de WhatsApp y correo.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════ PANTALLA: CALIFICACIONES (MATRIZ INTERACTIVA) ══════════ -->
+        <section class="screen" id="screen-notas">
+          <div class="card-header">
+            <div>
+              <h1 style="font-size:26px;font-weight:800">Planilla y Calificaciones</h1>
+              <p style="color:var(--ink2);font-size:14px;margin-top:2px">Edición ágil celda por celda y ponderación acordada entre docentes.</p>
+            </div>
+            <div class="row no-print" style="gap:10px">
+              <div class="seg" id="filtro-notas">
+                <button data-filtro-notas="todas" class="on">Todas</button>
+                <button data-filtro-notas="individual">Individuales</button>
+                <button data-filtro-notas="colectiva">Compartidas</button>
+              </div>
+              <button class="btn btn-p btn-sm" data-action="nueva-ev">＋ Nueva Evaluación</button>
+            </div>
+          </div>
+
+          <!-- Matriz Interactiva de Calificaciones de Escritorio -->
+          <div class="gradebook-matrix-container" id="gradebook-matrix-box">
+            <div class="matrix-toolbar">
+              <div class="row" style="gap:10px">
+                <span class="chip c-teal">⚡ Edición directa en planilla</span>
+                <span style="font-size:12.5px;color:var(--ink2)">Navegá con <kbd style="font-weight:700;padding:2px 5px;background:var(--bg-subtle);border-radius:4px">Tab</kbd> o <kbd style="font-weight:700;padding:2px 5px;background:var(--bg-subtle);border-radius:4px">Enter</kbd></span>
+              </div>
+              <button class="btn btn-s btn-xs" id="btn-switch-cards-view">📱 Ver modo tarjetas</button>
+            </div>
+            <div class="matrix-table-wrap" id="matrix-table-wrap"></div>
+          </div>
+
+          <!-- Lista de Tarjetas de Evaluaciones (Móvil / Alternativa) -->
+          <div id="lista-evs-cards" style="display:none;margin-top:16px" class="list"></div>
+        </section>
+
+        <!-- ══════════ PANTALLA: CALIFICAR EVALUACIÓN ESPECÍFICA ══════════ -->
+        <section class="screen" id="screen-calificar">
+          <div class="card-header">
+            <div>
+              <button class="backlink" data-nav="notas" style="margin-bottom:6px">← Volver a Calificaciones</button>
+              <h1 id="cal-titulo" style="font-size:24px;font-weight:800"></h1>
+              <p style="color:var(--ink2);font-size:14px" id="cal-sub"></p>
+            </div>
+            <button class="btn btn-s btn-sm no-print" id="btn-edit-current-ev">⚙ Configurar evaluación</button>
+          </div>
+
+          <div id="cal-docwrap" style="margin-bottom:14px"></div>
+
+          <div class="card" style="padding:14px 18px;margin-bottom:16px">
+            <div class="row" style="gap:14px">
+              <div class="pbar"><i id="cal-bar" style="width:0%"></i></div>
+              <b id="cal-prog" style="font:700 13.5px 'Sora';white-space:nowrap">0 calificados</b>
+            </div>
+          </div>
+
+          <!-- Split Layout: Lista con Recuadros Numéricos + Barra Lateral Numérica -->
+          <div class="grading-split-grid">
+            <div class="list" id="cal-lista"></div>
+
+            <!-- Panel de Barra Lateral Numérica para Calificación Rápida -->
+            <div class="grading-lateral-panel" id="cal-lateral-keypad">
+              <div class="gl-student-preview" id="gl-preview-box">
+                <span class="av av-lg" id="gl-preview-av" style="background:var(--teal)">🎓</span>
+                <div class="grow" style="min-width:0">
+                  <span class="chip c-teal" style="font-size:10.5px;margin-bottom:4px">Alumno en foco</span>
+                  <h4 id="gl-preview-name" style="font-size:15.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Seleccioná un estudiante</h4>
+                  <div style="font-size:12px;color:var(--ink2);margin-top:2px" id="gl-preview-meta">Clic o Tab para enfocar</div>
+                </div>
+                <div style="text-align:right;flex-shrink:0">
+                  <span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink3);display:block">Nota</span>
+                  <b id="gl-preview-score" style="font:800 24px 'Sora';color:var(--teal);line-height:1.1">—</b>
+                </div>
+              </div>
+
+              <div class="row" style="justify-content:space-between;margin-bottom:8px">
+                <span style="font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink2)">Teclado Rápido de Notas</span>
+                <span style="font-size:11px;color:var(--ink3)">1-clic asigna y avanza</span>
+              </div>
+
+              <div class="gl-keypad-grid" id="gl-keypad-buttons"></div>
+
+              <div class="row" style="margin-top:16px;gap:8px">
+                <button class="btn btn-s btn-sm grow" id="btn-cal-prev-student">‹ Anterior</button>
+                <button class="btn btn-p btn-sm grow" id="btn-cal-next-student">Siguiente ›</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════ PANTALLA: ASISTENCIA ══════════ -->
+        <section class="screen" id="screen-asistencia">
+          <div class="card-header">
+            <div>
+              <h1 style="font-size:26px;font-weight:800">Pase de Lista</h1>
+              <p style="color:var(--ink2);font-size:14px;margin-top:2px">Control de presencias, ausencias y tardanzas.</p>
+            </div>
+            <div class="row no-print" style="gap:8px">
+              <button class="btn btn-s btn-sm" data-action="todos-p">✓ Marcar a todos presente</button>
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px 16px;margin-bottom:16px">
+            <div class="asist-date-toolbar">
+              <div class="asist-date-picker-group">
+                <button class="icon-btn" data-action="dia-prev" title="Día anterior">‹</button>
+                <input type="date" id="fecha-asist" class="asist-date-input">
+                <button class="icon-btn" data-action="dia-next" title="Día siguiente">›</button>
+                <button class="btn btn-ghost btn-sm" id="btn-asist-hoy">Hoy</button>
+              </div>
+              <div id="as-resumen" class="asist-summary-pills"></div>
+            </div>
+          </div>
+
+          <div class="list" id="lista-asist"></div>
+        </section>
+
+        <!-- ══════════ PANTALLA: INFORMES & REPORTE OFICIAL PDF ══════════ -->
+        <section class="screen" id="screen-informes">
+          <div class="card-header no-print">
+            <div>
+              <h1 style="font-size:26px;font-weight:800">Informes & Exportación PDF</h1>
+              <p style="color:var(--ink2);font-size:14px;margin-top:2px" id="inf-sub">Visión integral del curso, fichas personalizadas y exportación en formato A4.</p>
+            </div>
+            <div class="row" style="gap:8px;flex-wrap:wrap">
+              <div class="seg" id="inf-view-tabs">
+                <button type="button" data-inf-tab="grilla" class="on">🗂 Grilla de Alumnos A4</button>
+                <button type="button" data-inf-tab="oficial">📋 Planilla Oficial (Acta)</button>
+                <button type="button" data-inf-tab="evaluaciones">📊 Desglose Evaluaciones</button>
+              </div>
+              <button class="btn btn-s btn-sm" id="btn-export-csv" title="Descargar planilla CSV para Excel">📊 Descargar CSV</button>
+              <button class="btn btn-p btn-sm" id="btn-imprimir-pdf" data-action="imprimir" title="Generar PDF o Imprimir en A4">🖨 Imprimir / Guardar PDF</button>
+            </div>
+          </div>
+
+          <!-- Barra de Controles y Personalización de PDF (Solo en pantalla) -->
+          <div class="card no-print pdf-control-panel" style="padding:14px 18px;margin-bottom:14px">
+            <div class="row" style="gap:14px;justify-content:space-between;flex-wrap:wrap">
+              <!-- Orientación de Hoja A4 -->
+              <div class="row" style="gap:8px;align-items:center">
+                <span style="font-size:12.5px;font-weight:700;color:var(--ink2)">Formato A4:</span>
+                <div class="seg seg-sm" id="pdf-orientacion">
+                  <button type="button" data-orient="portrait" class="on">📄 Vertical</button>
+                  <button type="button" data-orient="landscape">📑 Horizontal</button>
+                </div>
+              </div>
+
+              <!-- Filtro de Condición -->
+              <div class="row" style="gap:8px;align-items:center">
+                <span style="font-size:12.5px;font-weight:700;color:var(--ink2)">Filtrar alumnos:</span>
+                <select id="pdf-filtro-condicion" style="padding:5px 12px;font-size:12.5px;border-radius:8px;font-weight:600">
+                  <option value="todos">Todos los alumnos</option>
+                  <option value="promociona">Solo Promocionan</option>
+                  <option value="regular">Solo Regulares</option>
+                  <option value="libre">Solo En Riesgo / Libres</option>
+                </select>
+              </div>
+
+              <!-- Checkboxes de Datos a Incluir en la Ficha -->
+              <div class="row" style="gap:14px;align-items:center;flex-wrap:wrap">
+                <label style="font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:5px;cursor:pointer">
+                  <input type="checkbox" id="pdf-chk-evals" checked style="accent-color:var(--teal)"> Evaluaciones
+                </label>
+                <label style="font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:5px;cursor:pointer">
+                  <input type="checkbox" id="pdf-chk-asist" checked style="accent-color:var(--teal)"> Asistencia
+                </label>
+                <label style="font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:5px;cursor:pointer">
+                  <input type="checkbox" id="pdf-chk-obs" checked style="accent-color:var(--teal)"> Observaciones
+                </label>
+                <label style="font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:5px;cursor:pointer">
+                  <input type="checkbox" id="pdf-chk-firmas" checked style="accent-color:var(--teal)"> Bloque de Firmas
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Encabezado Académico para Impresión y PDF -->
+          <div class="pdf-academic-header" id="pdf-header-block"></div>
+
+          <div id="inf-body"></div>
+
+          <!-- Bloque de Firmas Institucionales para PDF -->
+          <div class="pdf-signatures-block" id="pdf-signatures-block"></div>
+        </section>
+
+        <!-- ══════════ PANTALLA: EQUIPO DOCENTE & AJUSTES ══════════ -->
+        <section class="screen" id="screen-equipo">
+          <div class="card-header">
+            <div>
+              <h1 style="font-size:26px;font-weight:800">Equipo Docente & Materia</h1>
+              <p style="color:var(--ink2);font-size:14px;margin-top:2px" id="eq-sub">Docentes participantes, roles y datos de contacto colaborativo.</p>
+            </div>
+            <button class="btn btn-p btn-sm" data-action="nuevo-doc">＋ Sumar docente al equipo</button>
+          </div>
+
+          <div class="list" id="eq-lista"></div>
+
+          <div class="card" style="margin-top:24px">
+            <h4 style="font-size:16px;margin-bottom:12px">Gestión de Cursos y Materias</h4>
+            <p style="font-size:13.5px;color:var(--ink2);margin-bottom:14px">Creá nuevas materias o cambiá de curso en cualquier momento.</p>
+            <button class="btn btn-s" id="btn-abrir-cursos">📚 Ver mis cursos / Crear nueva materia</button>
+          </div>
+
+          <div class="card" style="margin-top:16px;border-left:4px solid var(--teal)">
+            <div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+              <div>
+                <div class="row" style="gap:8px;align-items:center;margin-bottom:4px">
+                  <span style="font-size:20px">⚡</span>
+                  <h4 style="font-size:16px;margin:0">Sincronización en la Nube (Tiempo Real)</h4>
+                  <span class="chip c-teal" id="sb-status-chip">⚡ Activa</span>
+                </div>
+                <p style="font-size:13px;color:var(--ink2);margin:0">Tus cursos, notas, asistencias y equipo docente se sincronizan automáticamente en tiempo real entre tus dispositivos con Supabase PostgreSQL.</p>
+              </div>
+              <button class="btn btn-p btn-sm" id="btn-sync-cloud-manual">🔄 Forzar Sincronización</button>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:16px">
+            <h4 style="font-size:16px;margin-bottom:12px">Opciones de la Cuenta</h4>
+            <div class="row" style="gap:10px;flex-wrap:wrap">
+              <button class="btn btn-s btn-sm" id="usr-admin" style="display:none">👥 Panel de administración de usuarios</button>
+              <button class="btn btn-s btn-sm" data-action="reset">↺ Reiniciar datos locales</button>
+              <button class="btn btn-danger btn-sm" id="logout">🚪 Cerrar sesión</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════ PANTALLA: DECLARACIÓN JURADA (LEY 3416/77) ══════════ -->
+        <section class="screen" id="screen-ddjj">
+          <div class="card-header no-print">
+            <div>
+              <h1 style="font-size:26px;font-weight:800">Declaración Jurada de Cargos e Incompatibilidad</h1>
+              <p style="color:var(--ink2);font-size:14px;margin-top:2px">Ley Provincial Nº 3416/77 · Ministerio de Educación de la Provincia de Jujuy</p>
+            </div>
+            <div class="row" style="gap:8px;flex-wrap:wrap">
+              <button class="btn btn-s btn-sm" id="btn-nuevo-cargo-ddjj">＋ Agregar Cargo / Horas</button>
+              <button class="btn btn-p btn-sm" id="btn-imprimir-ddjj">🖨 Imprimir Formulario Oficial (A4)</button>
+            </div>
+          </div>
+
+          <!-- Banner de Estado de Compatibilidad Horaria y Carga Semanal -->
+          <div class="card no-print" id="ddjj-status-banner" style="padding:14px 18px;margin-bottom:14px">
+            <div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+              <div class="row" style="gap:10px;align-items:center">
+                <span id="ddjj-status-badge" class="chip c-teal" style="font-size:13px;padding:6px 12px;font-weight:800">✓ Horarios Compatibles</span>
+                <span id="ddjj-status-desc" style="font-size:13px;color:var(--ink2)">Sin superposición horaria detectada. Total: <b>0 hs</b> semanales.</span>
+              </div>
+              <div class="row" style="gap:8px">
+                <button class="btn btn-ghost btn-xs" id="btn-precargar-ddjj-curso">📥 Vincular curso actual</button>
+                <button class="btn btn-ghost btn-xs" id="btn-limpiar-ddjj">🧹 Vaciar campos</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pestañas internas de DDJJ -->
+          <div class="seg seg-sm no-print" id="ddjj-tabs" style="margin-bottom:16px">
+            <button type="button" data-ddjj-tab="cuadro1" class="on">📋 Cuadro 1: Cargos y Funciones</button>
+            <button type="button" data-ddjj-tab="horarios">🕒 Horarios Semanales (Lun - Sáb)</button>
+            <button type="button" data-ddjj-tab="cuadro2">🎓 Cuadro 2: Nivel Superior</button>
+            <button type="button" data-ddjj-tab="datos">👤 Datos Personales & Domicilio</button>
+            <button type="button" data-ddjj-tab="vista-oficial">📄 Vista Previa Imprimible Ley 3416</button>
+          </div>
+
+          <!-- Sub-pantalla 1: Cuadro 1 Cargos y Funciones -->
+          <div id="ddjj-panel-cuadro1" class="ddjj-panel">
+            <div class="card" style="padding:0;overflow:hidden">
+              <div style="padding:16px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+                <div>
+                  <h4 style="font-size:16px">Datos Relacionados con las Funciones, Cargos y Ocupaciones (Cuadro 1)</h4>
+                  <p style="font-size:12.5px;color:var(--ink2);margin-top:2px">Registrá todos los cargos y horas en organismos nacionales, provinciales, municipales o privados.</p>
+                </div>
+                <button class="btn btn-p btn-xs" data-action="open-modal-cargo">＋ Nuevo Cargo</button>
+              </div>
+              <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+                <table class="official-academic-table" id="ddjj-cargos-tabla">
+                  <thead>
+                    <tr>
+                      <th style="width:36px">Nº</th>
+                      <th>Ministerio</th>
+                      <th>Establecimiento / Repartición</th>
+                      <th>Jurisdicción</th>
+                      <th>Cargo / Horas</th>
+                      <th>Nivel / Ciclo</th>
+                      <th>Tipo Cargo</th>
+                      <th>Carácter</th>
+                      <th>Período</th>
+                      <th>Situación</th>
+                      <th style="width:90px" class="no-print">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ddjj-cargos-tbody">
+                    <tr><td colspan="11" style="padding:28px;text-align:center;color:var(--ink2)">No hay cargos cargados. Hacé clic en "＋ Agregar Cargo" para registrar.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sub-pantalla 2: Horarios Semanales Discriminados -->
+          <div id="ddjj-panel-horarios" class="ddjj-panel" style="display:none">
+            <div class="card" style="padding:0;overflow:hidden">
+              <div style="padding:16px 20px;border-bottom:1px solid var(--line)">
+                <h4 style="font-size:16px">Distribución de Horarios por Cargo y Repartición</h4>
+                <p style="font-size:12.5px;color:var(--ink2);margin-top:2px">Horarios discriminados de acuerdo con los números de orden de la declaración jurada.</p>
+              </div>
+              <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+                <table class="official-academic-table" id="ddjj-horarios-tabla">
+                  <thead>
+                    <tr>
+                      <th style="width:45px">Orden</th>
+                      <th>Establecimiento / Cargo</th>
+                      <th>LUNES</th>
+                      <th>MARTES</th>
+                      <th>MIÉRCOLES</th>
+                      <th>JUEVES</th>
+                      <th>VIERNES</th>
+                      <th>SÁBADO</th>
+                      <th style="width:110px">Total Hs</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ddjj-horarios-tbody">
+                    <tr><td colspan="9" style="padding:24px;text-align:center">Cargá cargos en el Cuadro 1 para definir sus horarios.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sub-pantalla 3: Cuadro 2 Nivel Superior -->
+          <div id="ddjj-panel-cuadro2" class="ddjj-panel" style="display:none">
+            <div class="card" style="padding:0;overflow:hidden">
+              <div style="padding:16px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+                <div>
+                  <h4 style="font-size:16px">Detalle de Espacios Curriculares (Cuadro 2)</h4>
+                  <p style="font-size:12.5px;color:var(--ink2);margin-top:2px">Únicamente para horas y/o cargos de nivel superior no universitario.</p>
+                </div>
+                <button class="btn btn-s btn-xs" id="btn-nuevo-espacio-ddjj">＋ Sumar Espacio Curricular</button>
+              </div>
+              <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+                <table class="official-academic-table" id="ddjj-espacios-tabla">
+                  <thead>
+                    <tr>
+                      <th style="width:45px">Orden</th>
+                      <th>Espacio Curricular</th>
+                      <th style="width:80px">Horas</th>
+                      <th style="width:130px">Carácter</th>
+                      <th style="width:100px">Curso</th>
+                      <th style="width:100px">División</th>
+                      <th style="width:80px" class="no-print">Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ddjj-espacios-tbody">
+                    <tr><td colspan="7" style="padding:24px;text-align:center;color:var(--ink2)">Sin espacios curriculares de nivel superior registrados.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sub-pantalla 4: Datos Personales del Docente -->
+          <div id="ddjj-panel-datos" class="ddjj-panel" style="display:none">
+            <div class="card" style="max-width:800px;margin:0 auto;padding:24px">
+              <h4 style="font-size:18px;margin-bottom:6px">Datos Personales y de Identificación del Declarante</h4>
+              <p style="font-size:13px;color:var(--ink2);margin-bottom:18px">Estos datos completarán la cabecera oficial de la Declaración Jurada Ley 3416/77.</p>
+              
+              <div class="row" style="gap:12px;margin-bottom:12px">
+                <div style="flex:2">
+                  <label class="lbl">Apellido y Nombre Completo</label>
+                  <input type="text" id="ddjj-nombre" placeholder="Ej: Leonel Gimenez">
+                </div>
+                <div style="flex:1">
+                  <label class="lbl">DNI / L.C. / L.E.</label>
+                  <input type="text" id="ddjj-dni" placeholder="Ej: 34.635.700">
+                </div>
+              </div>
+
+              <div class="row" style="gap:12px;margin-bottom:12px">
+                <div style="flex:1">
+                  <label class="lbl">CUIL</label>
+                  <input type="text" id="ddjj-cuil" placeholder="Ej: 20-34635700-4">
+                </div>
+                <div style="flex:1">
+                  <label class="lbl">Fecha de Nacimiento</label>
+                  <input type="date" id="ddjj-fnac">
+                </div>
+                <div style="flex:1.5">
+                  <label class="lbl">Título Habilitante / Especialidad</label>
+                  <input type="text" id="ddjj-titulo" placeholder="Ej: Prof. en Letras">
+                </div>
+              </div>
+
+              <div class="row" style="gap:12px;margin-bottom:12px">
+                <div style="flex:2">
+                  <label class="lbl">Domicilio (Calle y Altura)</label>
+                  <input type="text" id="ddjj-domicilio" placeholder="Ej: Belgrano 1245">
+                </div>
+                <div style="flex:1">
+                  <label class="lbl">Barrio</label>
+                  <input type="text" id="ddjj-barrio" placeholder="Ej: Los Perales">
+                </div>
+                <div style="flex:1">
+                  <label class="lbl">Localidad</label>
+                  <input type="text" id="ddjj-localidad" placeholder="Ej: San Salvador de Jujuy">
+                </div>
+              </div>
+
+              <div class="row" style="gap:12px;margin-top:18px;justify-content:flex-end">
+                <button class="btn btn-p" id="btn-guardar-datos-ddjj">Guardar Datos Personales ✓</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sub-pantalla 5: Vista Previa Formulario Oficial Ley 3416/77 (Imprimible) -->
+          <div id="ddjj-panel-vista-oficial" class="ddjj-panel" style="display:none">
+            <div class="card no-print" style="margin-bottom:14px;padding:12px 18px;background:var(--teal-t);border-color:var(--teal)">
+              <div class="row" style="justify-content:space-between;align-items:center">
+                <span>📄 <b>Formulario Oficial Ley 3416/77:</b> Formato exacto provincial de 2 páginas A4 listo para imprimir y presentar.</span>
+                <button class="btn btn-p btn-sm" onclick="window.print()">🖨 Imprimir Formulario</button>
+              </div>
+            </div>
+            <div id="ddjj-printable-container"></div>
+          </div>
+        </section>
+
+        <!-- ══════════ PANTALLA: RÉGIMEN DE LICENCIAS (DEC. 561-G-71) ══════════ -->
+        <section class="screen" id="screen-licencias">
+          <div class="card-header no-print">
+            <div>
+              <h1 style="font-size:26px;font-weight:800">Régimen de Licencias, Justificaciones y Permisos</h1>
+              <p style="color:var(--ink2);font-size:14px;margin-top:2px">Decreto Provincial Nº 561-G-71, 1813-G-73, Res. 071-D-91 y concordantes</p>
+            </div>
+            <div class="row" style="gap:8px;flex-wrap:wrap">
+              <button class="btn btn-p btn-sm" id="btn-abrir-modal-licencia">＋ Registrar Licencia</button>
+              <button class="btn btn-s btn-sm" id="btn-nota-licencia-directo">📄 Generar Nota Formal (A4)</button>
+            </div>
+          </div>
+
+          <!-- Panel de Cupos Anuales del Docente -->
+          <div class="kpi-grid no-print" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px">
+            <div class="kpi-card">
+              <div class="kpi-icon" style="background:var(--teal-t);color:var(--teal)">📅</div>
+              <div class="kpi-data">
+                <small>Art. 20 (Particulares)</small>
+                <b id="lic-kpi-art20">0 / 6 ds</b>
+                <span style="font-size:11px;color:var(--ink2)">Máx. 2 por mes</span>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon" style="background:var(--coral-t);color:var(--coral)">🩺</div>
+              <div class="kpi-data">
+                <small>Art. 2 (Enferm. Comunes)</small>
+                <b id="lic-kpi-art2">0 / 30 ds</b>
+                <span style="font-size:11px;color:var(--ink2)">40 ds por cirugía menor</span>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon" style="background:var(--amber-t);color:#805200">👨‍👩‍👧</div>
+              <div class="kpi-data">
+                <small>Art. 9 (Atenc. Familiar)</small>
+                <b id="lic-kpi-art9">0 / 10 ds</b>
+                <span style="font-size:11px;color:var(--ink2)">Con goce (+20 sin goce)</span>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon" style="background:var(--purple-t);color:var(--purple)">🎓</div>
+              <div class="kpi-data">
+                <small>Art. 27 (Rendir Examen)</small>
+                <b id="lic-kpi-art27">0 / 28 ds</b>
+                <span style="font-size:11px;color:var(--ink2)">4 turnos de 7 días</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Selector de Pestañas de Licencias -->
+          <div class="seg seg-sm no-print" id="lic-tabs" style="margin-bottom:16px">
+            <button type="button" data-lic-tab="historial" class="on">📋 Mis Solicitudes de Licencia</button>
+            <button type="button" data-lic-tab="catalogo">📖 Catálogo y Buscador de Artículos</button>
+            <button type="button" data-lic-tab="nota">📄 Generador de Nota Formal A4</button>
+          </div>
+
+          <!-- Pestaña 1: Historial de Licencias Solicitadas -->
+          <div id="lic-panel-historial" class="lic-panel">
+            <div class="card" style="padding:0;overflow:hidden">
+              <div style="padding:16px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+                <h4 style="font-size:16px">Historial de Licencias e Inasistencias Justificadas</h4>
+                <button class="btn btn-p btn-xs" data-action="open-modal-licencia">＋ Nueva Licencia</button>
+              </div>
+              <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+                <table class="official-academic-table" id="lic-tabla-historial">
+                  <thead>
+                    <tr>
+                      <th style="width:36px">Nº</th>
+                      <th>Artículo</th>
+                      <th>Causal / Motivo</th>
+                      <th>Desde</th>
+                      <th>Hasta</th>
+                      <th style="width:65px">Días</th>
+                      <th>Goce de Haberes</th>
+                      <th>Estado</th>
+                      <th style="width:120px" class="no-print">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="lic-tbody-historial">
+                    <tr><td colspan="9" style="padding:28px;text-align:center;color:var(--ink2)">No hay licencias solicitadas en el período. Hacé clic en "＋ Registrar Licencia".</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pestaña 2: Catálogo de Artículos Normativos -->
+          <div id="lic-panel-catalogo" class="lic-panel" style="display:none">
+            <div class="card no-print" style="margin-bottom:14px;padding:14px 18px">
+              <div class="row" style="gap:10px;align-items:center">
+                <input type="text" id="lic-buscador-input" placeholder="🔍 Buscar por palabra clave (ej: enfermedad, lactancia, matrimonio, duelo, examen, particular)..." style="flex:1">
+                <select id="lic-filtro-categoria" style="width:200px;font-weight:600">
+                  <option value="todas">Todas las categorías</option>
+                  <option value="salud">Salud y Médicas</option>
+                  <option value="familiar">Familiares y Duelo</option>
+                  <option value="estudios">Estudio y Perfeccionamiento</option>
+                  <option value="institucional">Institucionales y Gremiales</option>
+                  <option value="particulares">Razones Particulares</option>
+                </select>
+              </div>
+            </div>
+            <div id="lic-catalogo-grid" class="list" style="gap:10px"></div>
+          </div>
+
+          <!-- Pestaña 3: Generador de Nota Formal para Presentar en la Escuela -->
+          <div id="lic-panel-nota" class="lic-panel" style="display:none">
+            <div class="card no-print" style="margin-bottom:14px;padding:14px 18px;background:var(--teal-t);border-color:var(--teal)">
+              <div class="row" style="justify-content:space-between;align-items:center">
+                <span>📄 <b>Nota Oficial de Solicitud de Licencia:</b> Lista para imprimir y presentar a Dirección / Secretaría.</span>
+                <button class="btn btn-p btn-sm" onclick="window.print()">🖨 Imprimir Nota A4</button>
+              </div>
+            </div>
+            <div id="lic-nota-container" class="card" style="max-width:760px;margin:0 auto;padding:40px 48px;background:#fff;color:#111;border-radius:12px;box-shadow:var(--shadow-md)"></div>
+          </div>
+        </section>
+
+        <!-- ══════════ PANTALLA: ESTATUTO DEL DOCENTE & SIMULADOR (LEY 3520/78) ══════════ -->
+        <section class="screen" id="screen-estatuto">
+          <div class="card-header no-print">
+            <div>
+              <h1 style="font-size:26px;font-weight:800">Estatuto del Docente & Simulador de Puntaje</h1>
+              <p style="color:var(--ink2);font-size:14px;margin-top:2px">Leyes Provinciales Nº 3520/78, 4528/90, 4680/93 y Reglamentación Decreto 3672-G-78</p>
+            </div>
+            <div class="row" style="gap:8px;flex-wrap:wrap">
+              <button class="btn btn-p btn-sm" id="btn-calcular-puntaje-estatuto">📊 Calcular mi Puntaje de Junta</button>
+            </div>
+          </div>
+
+          <!-- Pestañas internas de Estatuto -->
+          <div class="seg seg-sm no-print" id="estatuto-tabs" style="margin-bottom:16px">
+            <button type="button" data-est-tab="simulador" class="on">📊 Simulador de Puntaje de Junta (LUOM)</button>
+            <button type="button" data-est-tab="compendio">⚖️ Compendio y Articulado (95 Artículos)</button>
+            <button type="button" data-est-tab="tardanzas">⏰ Régimen de Tardanzas e Inasistencias (Art. 85-92)</button>
+          </div>
+
+          <!-- Pestaña 1: Simulador de Puntaje para Junta de Clasificación -->
+          <div id="est-panel-simulador" class="est-panel">
+            <div class="master-detail-grid" style="grid-template-columns:1.2fr 0.8fr;gap:18px">
+              <!-- Formulario de Antecedentes -->
+              <div class="card" style="padding:22px">
+                <h4 style="font-size:17px;margin-bottom:6px">Valoración de Títulos y Antecedentes (Capítulo X Art. 19)</h4>
+                <p style="font-size:12.5px;color:var(--ink2);margin-bottom:18px">Simulá tu puntaje de antecedentes oficial para presentación ante la Junta de Clasificación Docente.</p>
+                
+                <label class="lbl">1. Título de Base (Art. 8º y 19º)</label>
+                <select id="sim-titulo-tipo" style="margin-bottom:10px;font-weight:700">
+                  <option value="9">Título Docente para la especialidad (9 Puntos)</option>
+                  <option value="6">Título Habilitante en la especialidad (6 Puntos)</option>
+                  <option value="3">Título Supletorio (3 Puntos)</option>
+                </select>
+
+                <div class="row" style="gap:12px;margin-bottom:10px">
+                  <div style="flex:1">
+                    <label class="lbl">Promedio de Calificación del Título</label>
+                    <select id="sim-titulo-promedio">
+                      <option value="1">Sobresaliente (9.00 a 10.00) · 1.00 punto</option>
+                      <option value="0.75">Distinguido (8.00 a 8.99) · 0.75 punto</option>
+                      <option value="0.50">Muy Bueno (7.00 a 7.99) · 0.50 punto</option>
+                      <option value="0">Menor a 7.00 · 0 puntos</option>
+                    </select>
+                  </div>
+                  <div style="flex:1">
+                    <label class="lbl">Otros Títulos Superiores de la Especialidad</label>
+                    <select id="sim-otros-titulos">
+                      <option value="0">Ninguno adicional (0 puntos)</option>
+                      <option value="1">Título técnico universitario/terciario (1 punto)</option>
+                      <option value="2">Título docente o profesional universitario afín (2 puntos máx.)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="row" style="gap:12px;margin-bottom:10px">
+                  <div style="flex:1">
+                    <label class="lbl">Antigüedad del Título Docente (Años)</label>
+                    <input type="number" id="sim-ant-titulo" min="0" max="30" value="4" placeholder="0.25 pt/año (máx 3 pts)">
+                  </div>
+                  <div style="flex:1">
+                    <label class="lbl">Antigüedad en Docencia Media/Superior (Años)</label>
+                    <input type="number" id="sim-ant-docencia" min="0" max="40" value="6" placeholder="0.25 pt/año (máx 6 pts)">
+                  </div>
+                </div>
+
+                <label class="lbl">2. Conceptos Profesionales (Últimos 3 años)</label>
+                <div class="row" style="gap:10px;margin-bottom:10px">
+                  <div style="flex:1">
+                    <select id="sim-conc-1">
+                      <option value="1">Año 1: Sobresaliente (1 pt)</option>
+                      <option value="0.5">Año 1: Muy Bueno (0.50 pt)</option>
+                      <option value="0">Año 1: Bueno / Sin concepto (0 pt)</option>
+                    </select>
+                  </div>
+                  <div style="flex:1">
+                    <select id="sim-conc-2">
+                      <option value="1">Año 2: Sobresaliente (1 pt)</option>
+                      <option value="0.5">Año 2: Muy Bueno (0.50 pt)</option>
+                      <option value="0">Año 2: Bueno / Sin concepto (0 pt)</option>
+                    </select>
+                  </div>
+                  <div style="flex:1">
+                    <select id="sim-conc-3">
+                      <option value="1">Año 3: Sobresaliente (1 pt)</option>
+                      <option value="0.5">Año 3: Muy Bueno (0.50 pt)</option>
+                      <option value="0">Año 3: Bueno / Sin concepto (0 pt)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <label class="lbl">3. Perfeccionamiento Docente y Cursos Aprobados</label>
+                <div class="row" style="gap:12px;margin-bottom:10px">
+                  <div style="flex:1">
+                    <label class="lbl" style="margin-top:0">Total Horas Cátedra Cursos con Evaluación</label>
+                    <input type="number" id="sim-horas-cursos" min="0" step="10" value="180" placeholder="0.01 pt cada 10 hs (máx 7 pts)">
+                  </div>
+                  <div style="flex:1">
+                    <label class="lbl" style="margin-top:0">Post-título / Especialización Superior</label>
+                    <select id="sim-postitulo">
+                      <option value="0">Sin post-título (0 pts)</option>
+                      <option value="1">Diplomatura o actualización (1 pt)</option>
+                      <option value="2">Especialización Superior / Postítulo (2 pts)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <label class="lbl">4. Publicaciones, Premios y Otros Antecedentes</label>
+                <div class="row" style="gap:12px">
+                  <div style="flex:1">
+                    <label class="lbl" style="margin-top:0">Libros y Publicaciones Científicas/Educativas</label>
+                    <select id="sim-publicaciones">
+                      <option value="0">Sin publicaciones (0 pts)</option>
+                      <option value="0.5">Artículos o folletos (0.50 pt)</option>
+                      <option value="1.5">Libro publicado con referato (1.50 pts)</option>
+                      <option value="3">Varios libros/publicaciones (3 pts máx)</option>
+                    </select>
+                  </div>
+                  <div style="flex:1">
+                    <label class="lbl" style="margin-top:0">Concursos Ganados / Cargos de Ascenso</label>
+                    <select id="sim-concursos">
+                      <option value="0">Ninguno (0 pts)</option>
+                      <option value="0.5">Concurso de antecedentes ganado (0.50 pt)</option>
+                      <option value="1">Concurso de oposición ganado (1.00 pt)</option>
+                      <option value="2">Cargos directivos desempeñados (2 pts máx)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tarjeta de Resultado y Resumen LUOM -->
+              <div>
+                <div class="card" style="padding:24px;text-align:center;position:sticky;top:20px;border-color:var(--teal)">
+                  <span class="chip c-teal" style="font-weight:800;margin-bottom:8px">PUNTAJE TOTAL ESTIMADO</span>
+                  <div style="font:800 52px/1 'Sora', sans-serif;color:var(--teal);margin:10px 0" id="sim-score-total">16.75</div>
+                  <p style="font-size:13px;color:var(--ink2);margin-bottom:18px">Puntaje proyectado para Listado de Orden de Mérito (Junta de Clasificación).</p>
+
+                  <div style="text-align:left;background:var(--bg-subtle);border-radius:10px;padding:14px;font-size:12.5px;display:flex;flex-direction:column;gap:6px" id="sim-desglose-box">
+                    <!-- Detalle inyectado dinámicamente -->
+                  </div>
+
+                  <button class="btn btn-p btn-block" id="btn-imprimir-puntaje-pdf" style="margin-top:18px">🖨 Imprimir Desglose de Puntaje</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pestaña 2: Compendio Legal y Articulado (95 Artículos) -->
+          <div id="est-panel-compendio" class="est-panel" style="display:none">
+            <div class="card no-print" style="margin-bottom:14px;padding:14px 18px">
+              <div class="row" style="gap:10px;align-items:center">
+                <input type="text" id="est-buscador-input" placeholder="🔍 Buscar en los 95 artículos (ej: deberes, derechos, estabilidad, cesantía, concurso, disponibilidad)..." style="flex:1">
+                <select id="est-filtro-capitulo" style="width:230px;font-weight:600">
+                  <option value="todos">Todos los Capítulos (I al XVI)</option>
+                  <option value="I">Cap. I: Disposiciones Generales</option>
+                  <option value="II">Cap. II: Personal Docente</option>
+                  <option value="III">Cap. III: Deberes y Derechos</option>
+                  <option value="IV">Cap. IV: Clasificación Establecimientos</option>
+                  <option value="V">Cap. V: Ejercicio de la Docencia</option>
+                  <option value="VI">Cap. VI: Nombramientos</option>
+                  <option value="VII">Cap. VII: De la Estabilidad</option>
+                  <option value="VIII">Cap. VIII: Destino de las Vacantes</option>
+                  <option value="IX">Cap. IX: De los Jurados</option>
+                  <option value="X">Cap. X: Titularización y Horas</option>
+                  <option value="XI">Cap. XI: De los Ascensos</option>
+                  <option value="XII">Cap. XII: Permutas y Traslados</option>
+                  <option value="XIII">Cap. XIII: Reincorporaciones</option>
+                  <option value="XIV">Cap. XIV: Interinatos y Suplencias</option>
+                  <option value="XV">Cap. XV: Junta de Clasificación</option>
+                  <option value="XVI">Cap. XVI: Juntas de Disciplina y Sanciones</option>
+                </select>
+              </div>
+            </div>
+            <div id="est-articulos-lista" class="list" style="gap:10px"></div>
+          </div>
+
+          <!-- Pestaña 3: Régimen de Tardanzas e Inasistencias (Art. 85 a 92) -->
+          <div id="est-panel-tardanzas" class="est-panel" style="display:none">
+            <div class="master-detail-grid" style="grid-template-columns:1fr 1fr;gap:18px">
+              <div class="card" style="padding:22px">
+                <h4 style="font-size:17px;margin-bottom:6px">Calculadora de Faltas de Puntualidad (Art. 92º)</h4>
+                <p style="font-size:13px;color:var(--ink2);margin-bottom:16px">La norma establece que <b>4 faltas de puntualidad equivalen a 1 inasistencia completa</b>.</p>
+                
+                <label class="lbl">Cantidad de llegadas tarde (hasta 10 minutos)</label>
+                <input type="number" id="calc-tardanzas-input" min="0" max="40" value="6" style="font-size:18px;font-weight:700">
+
+                <div style="margin-top:16px;background:var(--bg-subtle);border-radius:12px;padding:16px" id="calc-tardanzas-resultado">
+                  <!-- Resultado dinámico -->
+                </div>
+              </div>
+
+              <div class="card" style="padding:22px">
+                <h4 style="font-size:17px;margin-bottom:6px">Escala de Sanciones Disciplinarias (Art. 85º y 86º)</h4>
+                <div style="font-size:13px;color:var(--ink);display:flex;flex-direction:column;gap:8px;margin-top:12px">
+                  <div style="padding:8px 12px;background:var(--bg-subtle);border-radius:8px"><b>1º Incumplimiento de horario:</b> Sin sanción.</div>
+                  <div style="padding:8px 12px;background:var(--bg-subtle);border-radius:8px"><b>2º al 5º Incumplimiento:</b> Amonestación formal.</div>
+                  <div style="padding:8px 12px;background:var(--bg-subtle);border-radius:8px"><b>6º al 8º Incumplimiento:</b> Apercibimientos sucesivos.</div>
+                  <div style="padding:8px 12px;background:var(--amber-t);border-radius:8px;color:#6b4400"><b>9º Incumplimiento:</b> 1 día de suspensión sin goce de haberes.</div>
+                  <div style="padding:8px 12px;background:var(--coral-t);border-radius:8px;color:var(--coral)"><b>10º Incumplimiento:</b> 2 días de suspensión (solicitud de cesantía si supera el límite).</div>
+                  <div style="padding:8px 12px;background:var(--bg-subtle);border-radius:8px"><b>Más de 10 min de retraso:</b> Es considerado ausente directo.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════ PANTALLA: USUARIOS (ADMIN) ══════════ -->
+        <section class="screen" id="screen-usuarios">
+          <div class="card-header">
+            <div>
+              <button class="backlink" data-nav="equipo" style="margin-bottom:6px">← Volver a Equipo</button>
+              <h1 style="font-size:24px;font-weight:800">Panel de Administración de Usuarios</h1>
+              <p style="color:var(--ink2);font-size:14px">Control de accesos y roles institucionales.</p>
+            </div>
+            <button class="btn btn-s btn-sm" id="usr-refresh">🔄 Recargar lista</button>
+          </div>
+          <div class="list" id="usr-lista"></div>
+        </section>
+
+      </main>
+
+      <!-- BARRA DE NAVEGACIÓN MÓVIL (<900px) -->
+      <nav class="bottomnav no-print">
+        <button data-nav="inicio" class="on">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/></svg>
+          Inicio
+        </button>
+        <button data-nav="alumnos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="4"/></svg>
+          Alumnos
+        </button>
+        <button data-nav="notas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2h6v4H9z"/><path d="M9 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-4"/><path d="M9 14l2 2 4-4"/></svg>
+          Notas
+        </button>
+        <button data-nav="asistencia">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          Asistencia
+        </button>
+        <button data-nav="informes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+          Informes
+        </button>
+        <button data-nav="ddjj">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          DDJJ
+        </button>
+        <button data-nav="licencias">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+          Licencias
+        </button>
+        <button data-nav="estatuto">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Estatuto
+        </button>
+      </nav>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ COMMAND PALETTE (CTRL + K) ══════════ -->
+<div class="cmd-overlay" id="cmd-overlay">
+  <div class="cmd-modal">
+    <div class="cmd-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="cmd-input" class="cmd-input" placeholder="Escribí para buscar estudiante, docente o comando…" autocomplete="off">
+    </div>
+    <div class="cmd-results-list" id="cmd-results"></div>
+  </div>
+</div>
+
+<!-- ══════════ MODALES & DRAWERS ══════════ -->
+
+<!-- MODAL: NUEVO ESTUDIANTE -->
+<div class="overlay" id="m-alumno">
+  <div class="sheet"><div class="grab"></div>
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <h3>Nuevo Estudiante</h3>
+      <button class="icon-btn btn-sm" data-close>✕</button>
+    </div>
+    <label class="lbl">Apellido y Nombre</label>
+    <input type="text" id="na-nombre" placeholder="Ej: Anselmo Aldo Rafael">
+    <label class="lbl">DNI / Documento</label>
+    <input type="text" id="na-dni" placeholder="Ej: 34.635.700">
+    <label class="lbl">Teléfono / WhatsApp (para avisos a tutores)</label>
+    <input type="tel" id="na-telefono" placeholder="Ej: 5491145678901 o 1145678901">
+    <label class="lbl">Email del estudiante o tutor (opcional)</label>
+    <input type="email" id="na-email" placeholder="tutor@familia.edu">
+    <label class="lbl">Observaciones pedagógicas</label>
+    <input type="text" id="na-obs" placeholder="Ej: Buen desempeño en proyectos grupales">
+    <label class="lbl">Color de avatar</label>
+    <div class="color-picker" id="na-colores"></div>
+    <button class="btn btn-p btn-block" id="na-save" style="margin-top:22px">Agregar al curso</button>
+  </div>
+</div>
+
+<!-- MODAL: FICHA / PERFIL DETALLADO ESTUDIANTE (MÓVIL) -->
+<div class="overlay" id="m-perfil-alumno">
+  <div class="sheet"><div class="grab"></div>
+    <div id="perfil-body"></div>
+  </div>
+</div>
+
+<!-- MODAL: EDITAR ESTUDIANTE -->
+<div class="overlay" id="m-edit-alumno">
+  <div class="sheet"><div class="grab"></div>
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <h3>Editar Estudiante</h3>
+      <button class="icon-btn btn-sm" data-close>✕</button>
+    </div>
+    <input type="hidden" id="ea-id">
+    <label class="lbl">Apellido y Nombre</label>
+    <input type="text" id="ea-nombre">
+    <label class="lbl">DNI / Documento</label>
+    <input type="text" id="ea-dni" placeholder="Ej: 34.635.700">
+    <label class="lbl">Teléfono / WhatsApp de contacto</label>
+    <input type="tel" id="ea-telefono" placeholder="Ej: 5491145678901">
+    <label class="lbl">Email</label>
+    <input type="email" id="ea-email" placeholder="tutor@correo.edu">
+    <label class="lbl">Observaciones pedagógicas</label>
+    <textarea id="ea-obs"></textarea>
+    <div class="tag-pills" id="ea-tags">
+      <span class="tag-pill" data-add-tag="Participativo">＋ Participativo</span>
+      <span class="tag-pill" data-add-tag="Buen desempeño">＋ Buen desempeño</span>
+      <span class="tag-pill" data-add-tag="Requiere apoyo">＋ Requiere apoyo</span>
+      <span class="tag-pill" data-add-tag="Entregas al día">＋ Entregas al día</span>
+      <span class="tag-pill" data-add-tag="Justificó ausencias">＋ Justificó ausencias</span>
+    </div>
+    <label class="lbl">Color</label>
+    <div class="color-picker" id="ea-colores"></div>
+    <div class="row" style="margin-top:22px;gap:10px">
+      <button class="btn btn-danger" id="ea-delete" style="flex:1">🗑 Eliminar</button>
+      <button class="btn btn-p" id="ea-save" style="flex:2">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NUEVA EVALUACIÓN -->
+<div class="overlay" id="m-eval">
+  <div class="sheet"><div class="grab"></div>
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <h3>Nueva Evaluación</h3>
+      <button class="icon-btn btn-sm" data-close>✕</button>
+    </div>
+    <label class="lbl">Título de la evaluación</label>
+    <input type="text" id="ev-titulo" placeholder="Ej: TP Integrador N.º 1">
+    <label class="lbl">Fecha</label>
+    <input type="date" id="ev-fecha">
+    <label class="lbl">Modalidad de calificación</label>
+    <div class="seg" id="ev-tipo" style="margin-bottom:10px">
+      <button type="button" data-tipo="individual" class="on">👤 Individual</button>
+      <button type="button" data-tipo="colectiva">👥 Compartida (Ponderada)</button>
+    </div>
+    <div id="ev-colectiva" style="display:none">
+      <p style="font-size:13px;color:var(--ink2);margin-top:10px">Definí los docentes que aportan nota y el <b>peso (%)</b> de cada uno.</p>
+      <div id="ev-docentes"></div>
+    </div>
+    <button class="btn btn-p btn-block" id="ev-save" style="margin-top:22px">Crear evaluación →</button>
+  </div>
+</div>
+
+<!-- MODAL: EDITAR EVALUACIÓN -->
+<div class="overlay" id="m-edit-eval">
+  <div class="sheet"><div class="grab"></div>
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <h3>Editar Evaluación</h3>
+      <button class="icon-btn btn-sm" data-close>✕</button>
+    </div>
+    <input type="hidden" id="eev-id">
+    <label class="lbl">Título</label>
+    <input type="text" id="eev-titulo">
+    <label class="lbl">Fecha</label>
+    <input type="date" id="eev-fecha">
+    <label class="lbl">Modalidad</label>
+    <div class="seg" id="eev-tipo" style="margin-bottom:10px">
+      <button type="button" data-tipo="individual">👤 Individual</button>
+      <button type="button" data-tipo="colectiva">👥 Compartida</button>
+    </div>
+    <div id="eev-colectiva" style="display:none">
+      <div id="eev-docentes"></div>
+    </div>
+    <div class="row" style="margin-top:22px;gap:10px">
+      <button class="btn btn-danger" id="eev-delete" style="flex:1">🗑 Eliminar</button>
+      <button class="btn btn-p" id="eev-save" style="flex:2">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: AGREGAR DOCENTE AL EQUIPO -->
+<div class="overlay" id="m-docente">
+  <div class="sheet"><div class="grab"></div>
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <h3>Nuevo Docente en el Curso</h3>
+      <button class="icon-btn btn-sm" data-close>✕</button>
+    </div>
+    <label class="lbl">Nombre completo</label>
+    <input type="text" id="nd-nombre" placeholder="Ej: Sofía Herrera">
+    <label class="lbl">Email institucional</label>
+    <input type="email" id="nd-email" placeholder="sofia@escuela.edu">
+    <label class="lbl">Teléfono / WhatsApp de contacto</label>
+    <input type="tel" id="nd-telefono" placeholder="Ej: 5491144556677">
+    <label class="lbl">Rol en la materia</label>
+    <select id="nd-rol">
+      <option value="Co-titular">Docente Co-titular</option>
+      <option value="Titular">Docente Titular</option>
+      <option value="Auxiliar">Docente Auxiliar</option>
+      <option value="Coordinación">Coordinación / Jefatura</option>
+    </select>
+    <label class="lbl">Color identificador</label>
+    <div class="color-picker" id="nd-colores"></div>
+    <button class="btn btn-p btn-block" id="nd-save" style="margin-top:22px;margin-bottom:8px">Sumar al equipo</button>
+  </div>
+</div>
+
+<!-- MODAL: EDITAR DOCENTE DEL EQUIPO (CRUD) -->
+<div class="overlay" id="m-edit-docente">
+  <div class="sheet"><div class="grab"></div>
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <h3>Editar Docente</h3>
+      <button class="icon-btn btn-sm" data-close>✕</button>
+    </div>
+    <input type="hidden" id="ed-id">
+    <label class="lbl">Nombre completo</label>
+    <input type="text" id="ed-nombre">
+    <label class="lbl">Email institucional</label>
+    <input type="email" id="ed-email">
+    <label class="lbl">Teléfono / WhatsApp</label>
+    <input type="tel" id="ed-telefono" placeholder="Ej: 5491144556677">
+    <label class="lbl">Rol en la materia</label>
+    <select id="ed-rol">
+      <option value="Titular">Docente Titular</option>
+      <option value="Co-titular">Docente Co-titular</option>
+      <option value="Auxiliar">Docente Auxiliar</option>
+      <option value="Coordinación">Coordinación / Jefatura</option>
+    </select>
+    <label class="lbl">Color</label>
+    <div class="color-picker" id="ed-colores"></div>
+    <div class="row" style="margin-top:22px;gap:10px">
+      <button class="btn btn-danger" id="ed-delete" style="flex:1">🗑 Eliminar</button>
+      <button class="btn btn-p" id="ed-save" style="flex:2">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: SELECTOR Y GESTOR DE CURSOS -->
+<div class="overlay" id="m-cursos">
+  <div class="sheet"><div class="grab"></div>
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <h3>Mis Cursos y Materias</h3>
+      <button class="icon-btn btn-sm" data-close>✕</button>
+    </div>
+    <p class="sub" style="font-size:13.5px;color:var(--ink2)">Seleccioná un curso para gestionar o creá uno nuevo.</p>
+    <div class="list" id="lista-cursos" style="margin:14px 0"></div>
+    <button class="btn btn-p btn-block" id="btn-crear-nuevo-curso" style="margin-top:10px">＋ Crear nueva materia / curso</button>
+  </div>
+</div>
+
+<!-- MODAL: CREAR NUEVO CURSO -->
+<div class="overlay" id="m-nuevo-curso">
+  <div class="sheet"><div class="grab"></div>
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <h3>Nueva Materia / Curso</h3>
+      <button class="icon-btn btn-sm" data-close>✕</button>
+    </div>
+    <label class="lbl">Nombre de la materia</label>
+    <input type="text" id="nc-materia" placeholder="Ej: Historia Argentina">
+    <label class="lbl">Nivel</label>
+    <select id="nc-nivel">
+      <option>Secundaria</option>
+      <option>Primaria</option>
+      <option>Superior</option>
+    </select>
+    <label class="lbl">Curso / División</label>
+    <input type="text" id="nc-curso" placeholder="Ej: 4.º 2.ª">
+    <label class="lbl">Escala de calificación</label>
+    <select id="nc-escala">
+      <option value="10">1 a 10 (aprueba con 6)</option>
+      <option value="100">1 a 100 (aprueba con 60)</option>
+      <option value="7">1 a 7 (aprueba con 4)</option>
+    </select>
+    <button class="btn btn-p btn-block" id="nc-save" style="margin-top:22px">Crear y abrir aula →</button>
+  </div>
+</div>
+
+<!-- MODAL: IMPORTAR ALUMNOS (EXCEL / CSV / TEXTO) -->
+<div class="overlay" id="m-importar">
+  <div class="sheet"><div class="grab"></div>
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <h3>Importar Nómina de Estudiantes</h3>
+      <button class="icon-btn btn-sm" data-close>✕</button>
+    </div>
+    <p class="sub" style="font-size:13.5px;color:var(--ink2)">Cargá todos los estudiantes rápidamente desde Excel, CSV o pegando una lista.</p>
+
+    <div class="seg" id="import-mode-tabs" style="margin:14px 0 12px">
+      <button type="button" data-imp-tab="texto" class="on">📝 Pegar texto</button>
+      <button type="button" data-imp-tab="archivo">📁 Excel / CSV</button>
+      <button type="button" data-imp-tab="foto" id="btn-imp-tab-foto">📷 Foto / Escáner OCR</button>
+    </div>
+
+    <!-- Pestaña 1: Pegar lista de texto -->
+    <div id="imp-tab-texto">
+      <label class="lbl">Pegá los nombres acá (uno por línea)</label>
+      <textarea id="imp-textarea" placeholder="Ejemplo:
+Ana Torres, 11-4567-8901, ana@gmail.com, Participativa
+Bruno Cabrera, 11-4455-6677, Tutor: Carlos
+Camila Sosa | 11-2233-4455 | Entregas al día" style="min-height:110px"></textarea>
+      <div class="row" style="justify-content:space-between;margin-top:6px">
+        <span class="mini-hint" style="font-size:12px;color:var(--ink2)">Soporta listas con teléfonos, emails y notas.</span>
+        <button class="btn btn-ghost btn-xs" id="imp-ejemplo-btn">Cargar ejemplo</button>
+      </div>
+    </div>
+
+    <!-- Pestaña 2: Subir archivo -->
+    <div id="imp-tab-archivo" style="display:none">
+      <div class="dropzone" id="imp-dropzone">
+        <div class="dropzone-icon">📥</div>
+        <h4 id="imp-drop-title">Arrastrá tu archivo Excel o CSV acá</h4>
+        <p id="imp-drop-sub">o hacé clic para seleccionar (.xlsx, .xls, .csv, .txt)</p>
+        <input type="file" id="imp-file-input" accept=".xlsx,.xls,.csv,.txt,.tsv" style="display:none">
+      </div>
+      <div style="text-align:center;margin-top:10px">
+        <button class="btn btn-ghost btn-xs" id="btn-descargar-plantilla">📄 Descargar plantilla CSV de ejemplo</button>
+      </div>
+    </div>
+
+    <!-- Pestaña 3: Foto / Escáner OCR Inteligente -->
+    <div id="imp-tab-foto" style="display:none">
+      <div class="dropzone" id="ocr-dropzone" style="border:2px dashed var(--teal);background:var(--teal-t)">
+        <div class="dropzone-icon">📸</div>
+        <h4 id="ocr-drop-title">Tomá una foto o subí una imagen de la lista</h4>
+        <p id="ocr-drop-sub" style="font-size:12.5px;color:var(--ink2);margin-top:2px">Extrae automáticamente nombres y documentos desde actas o planillas en papel (.jpg, .png).</p>
+        <div class="row" style="gap:10px;margin-top:12px;justify-content:center">
+          <label class="btn btn-p btn-sm" style="cursor:pointer;margin:0">
+            📷 Abrir Cámara / Elegir Foto
+            <input type="file" id="ocr-file-input" accept="image/*" capture="environment" style="display:none">
+          </label>
+        </div>
+      </div>
+
+      <!-- Barra de Estado y Progreso del OCR -->
+      <div id="ocr-status-box" style="display:none;margin-top:12px;padding:12px;background:var(--bg-subtle);border-radius:10px">
+        <div class="row" style="justify-content:space-between;font-size:13px;font-weight:700">
+          <span id="ocr-status-text">Escaneando con IA OCR...</span>
+          <span id="ocr-status-pct">0%</span>
+        </div>
+        <div style="width:100%;height:6px;background:var(--line);border-radius:3px;margin-top:8px;overflow:hidden">
+          <div id="ocr-progress-bar" style="width:0%;height:100%;background:var(--teal);transition:width 0.2s ease"></div>
+        </div>
+      </div>
+
+      <!-- Vista previa miniatura imagen -->
+      <div id="ocr-preview-container" style="display:none;margin-top:12px;text-align:center">
+        <canvas id="ocr-canvas-preview" style="max-width:100%;max-height:140px;border-radius:8px;box-shadow:var(--shadow-sm);border:1px solid var(--line)"></canvas>
+      </div>
+    </div>
+
+    <!-- Vista previa -->
+    <div style="margin-top:16px">
+      <div class="row" style="justify-content:space-between">
+        <label class="lbl" style="margin:0">Vista previa de estudiantes detectados</label>
+        <span class="chip c-teal" id="imp-count-chip">0 detectados</span>
+      </div>
+      <div class="import-preview-box" id="imp-preview-box" style="background:var(--bg-subtle);border-radius:10px;max-height:160px;overflow-y:auto;padding:6px;margin:8px 0">
+        <div class="empty" style="padding:12px">Escribí, subí un archivo o tomá una foto para previsualizar.</div>
+      </div>
+    </div>
+
+    <!-- Modo de inserción -->
+    <div style="margin-top:10px">
+      <label class="lbl">¿Qué hacer con los estudiantes actuales?</label>
+      <div class="seg" id="imp-merge-mode">
+        <button type="button" data-merge="append" class="on">＋ Sumar a los existentes</button>
+        <button type="button" data-merge="replace">↺ Reemplazar nómina</button>
+      </div>
+    </div>
+
+    <button class="btn btn-p btn-block" id="imp-submit-btn" style="margin-top:18px" disabled>📥 Importar nómina →</button>
+  </div>
+</div>
+
+<!-- MODAL: AGREGAR / EDITAR CARGO DDJJ (LEY 3416/77) -->
+<div class="overlay" id="m-cargo-ddjj">
+  <div class="sheet" style="max-width:620px"><div class="grab"></div>
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <h3 id="m-cargo-ddjj-title">Agregar Cargo / Ocupación (Cuadro 1)</h3>
+      <button class="icon-btn btn-sm" data-close>✕</button>
+    </div>
+    <input type="hidden" id="cddjj-id">
+
+    <div class="row" style="gap:10px;margin-bottom:10px">
+      <div style="width:70px">
+        <label class="lbl">Nº Orden</label>
+        <input type="number" id="cddjj-orden" min="1" max="20" value="1">
+      </div>
+      <div style="flex:1">
+        <label class="lbl">Ministerio</label>
+        <input type="text" id="cddjj-ministerio" placeholder="Ej: Educación" value="Educación">
+      </div>
+      <div style="flex:1">
+        <label class="lbl">Jurisdicción</label>
+        <select id="cddjj-jurisdiccion">
+          <option>Provincial</option>
+          <option>Nacional</option>
+          <option>Municipal</option>
+          <option>Privado</option>
+        </select>
+      </div>
+    </div>
+
+    <label class="lbl">Establecimiento / Repartición</label>
+    <input type="text" id="cddjj-establecimiento" placeholder="Ej: Colegio Secundario Nº 1">
+
+    <div class="row" style="gap:10px;margin-bottom:10px">
+      <div style="flex:1">
+        <label class="lbl">Cargo u Horas (Cantidad)</label>
+        <input type="text" id="cddjj-horas" placeholder="Ej: 12 hs cátedra o Cargo 40hs">
+      </div>
+      <div style="flex:1">
+        <label class="lbl">Nivel o Ciclo</label>
+        <select id="cddjj-nivel">
+          <option value="Nivel Medio (NM)">Nivel Medio (NM)</option>
+          <option value="Nivel Terciario (NT)">Nivel Terciario (NT)</option>
+          <option value="Inicial (IN)">Inicial (IN)</option>
+          <option value="EGB 1 / Primaria">EGB 1 / Primaria (E1)</option>
+          <option value="EGB 2 (E2)">EGB 2 (E2)</option>
+          <option value="EGB 3 (E3)">EGB 3 (E3)</option>
+          <option value="Polimodal (PO)">Polimodal (PO)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row" style="gap:10px;margin-bottom:10px">
+      <div style="flex:1">
+        <label class="lbl">Tipo de Cargo</label>
+        <select id="cddjj-tipo">
+          <option>Docente</option>
+          <option>Administrativo</option>
+          <option>Profesional</option>
+          <option>Técnico profesional</option>
+        </select>
+      </div>
+      <div style="flex:1">
+        <label class="lbl">Carácter</label>
+        <select id="cddjj-caracter">
+          <option>Titular</option>
+          <option>Prov. / Interino</option>
+          <option>Suplente</option>
+        </select>
+      </div>
+      <div style="flex:1">
+        <label class="lbl">Situación</label>
+        <select id="cddjj-situacion">
+          <option>Activo</option>
+          <option>Pasivo</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row" style="gap:10px;margin-bottom:14px">
+      <div style="flex:1">
+        <label class="lbl">Desde</label>
+        <input type="date" id="cddjj-desde">
+      </div>
+      <div style="flex:1">
+        <label class="lbl">Hasta (o 'Continúa')</label>
+        <input type="text" id="cddjj-hasta" placeholder="Continúa o fecha">
+      </div>
+    </div>
+
+    <h4 style="font-size:14.5px;margin:12px 0 6px">Horario Semanal para este Cargo (Entrada - Salida)</h4>
+    <div class="row" style="gap:6px;flex-wrap:wrap">
+      <div style="flex:1;min-width:85px">
+        <label class="lbl" style="font-size:11px">LUNES</label>
+        <input type="text" id="cddjj-h-lun" placeholder="07:30-11:50" style="font-size:12px;padding:6px">
+      </div>
+      <div style="flex:1;min-width:85px">
+        <label class="lbl" style="font-size:11px">MARTES</label>
+        <input type="text" id="cddjj-h-mar" placeholder="07:30-11:50" style="font-size:12px;padding:6px">
+      </div>
+      <div style="flex:1;min-width:85px">
+        <label class="lbl" style="font-size:11px">MIÉRCOLES</label>
+        <input type="text" id="cddjj-h-mie" placeholder="07:30-11:50" style="font-size:12px;padding:6px">
+      </div>
+      <div style="flex:1;min-width:85px">
+        <label class="lbl" style="font-size:11px">JUEVES</label>
+        <input type="text" id="cddjj-h-jue" placeholder="07:30-11:50" style="font-size:12px;padding:6px">
+      </div>
+      <div style="flex:1;min-width:85px">
+        <label class="lbl" style="font-size:11px">VIERNES</label>
+        <input type="text" id="cddjj-h-vie" placeholder="07:30-11:50" style="font-size:12px;padding:6px">
+      </div>
+      <div style="flex:1;min-width:85px">
+        <label class="lbl" style="font-size:11px">SÁBADO</label>
+        <input type="text" id="cddjj-h-sab" placeholder="—" style="font-size:12px;padding:6px">
+      </div>
+    </div>
+
+    <button class="btn btn-p btn-block" id="btn-guardar-cargo-ddjj" style="margin-top:18px">Guardar Cargo en DDJJ ✓</button>
+  </div>
+</div>
+
+<!-- MODAL: REGISTRAR LICENCIA (DEC. 561-G-71) -->
+<div class="overlay" id="m-licencia-doc">
+  <div class="sheet" style="max-width:540px"><div class="grab"></div>
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <h3 id="m-licencia-title">Registrar Solicitud de Licencia</h3>
+      <button class="icon-btn btn-sm" data-close>✕</button>
+    </div>
+    <p class="sub" style="font-size:13px;color:var(--ink2)">Encuadre legal según Régimen Provincial de Licencias Docentes.</p>
+
+    <label class="lbl">Artículo Reglamentario / Motivo</label>
+    <select id="lic-form-articulo" style="font-weight:700">
+      <option value="art20">Art. 20: Razones Particulares de Fuerza Mayor (Hasta 6 ds/año, máx 2/mes con goce)</option>
+      <option value="art2">Art. 2: Enfermedad Común (Hasta 30 ds/año con goce / 40 ds cirugía menor)</option>
+      <option value="art9">Art. 9: Atención Grupo Familiar Enfermo (10 ds con goce + 20 ds sin goce)</option>
+      <option value="art27">Art. 27: Rendir Exámenes (Hasta 28 días hábiles en el año)</option>
+      <option value="art5">Art. 5: Cursos de Perfeccionamiento Docente (Hasta 6 ds con goce)</option>
+      <option value="art8">Art. 8: Enfermedad por Largo Tratamiento (365 ds con goce íntegro)</option>
+      <option value="art12">Art. 12: Maternidad (84 días / 105 días parto múltiple)</option>
+      <option value="art14">Art. 14: Lactancia (240 días corridos con reducción horaria)</option>
+      <option value="art17_mat">Art. 17: Matrimonio del agente (10 días corridos con goce)</option>
+      <option value="art17_nac">Art. 17: Nacimiento de hijo agente varón (2 días laborables)</option>
+      <option value="art17_fal1">Art. 17: Fallecimiento familiar 1º grado (5 días laborables)</option>
+      <option value="art17_fal2">Art. 17: Fallecimiento familiar 2º grado (2 días laborables)</option>
+      <option value="art18">Art. 18: Licencia Decenal Extraordinaria (6 meses sin sueldo cada 10 años)</option>
+      <option value="art24">Art. 24: Citaciones Judiciales</option>
+      <option value="art3">Art. 3: Desempeño de Cargo de Mayor Jerarquía</option>
+      <option value="otro">Otro artículo o causal no contemplada (Art. 28)</option>
+    </select>
+
+    <div class="row" style="gap:10px;margin-top:10px">
+      <div style="flex:1">
+        <label class="lbl">Fecha Desde</label>
+        <input type="date" id="lic-form-desde">
+      </div>
+      <div style="flex:1">
+        <label class="lbl">Fecha Hasta</label>
+        <input type="date" id="lic-form-hasta">
+      </div>
+      <div style="width:90px">
+        <label class="lbl">Días Solicitados</label>
+        <input type="number" id="lic-form-dias" min="1" max="365" value="1">
+      </div>
+    </div>
+
+    <label class="lbl">Establecimiento / Destino</label>
+    <input type="text" id="lic-form-escuela" placeholder="Ej: Colegio Secundario Nº 1">
+
+    <label class="lbl">Observaciones / Datos de Certificado Médico o Comprobante</label>
+    <input type="text" id="lic-form-obs" placeholder="Ej: Certificado Dr. Pérez matrícula 1450, diagnóstico reposo 48 hs">
+
+    <div style="margin-top:10px;padding:10px;background:var(--bg-subtle);border-radius:8px;font-size:12px;color:var(--ink2)" id="lic-form-info-norma">
+      ℹ️ Recordá presentar la certificación médica ante Reconocimiento Médico dentro de las <b>48 horas</b> de iniciada la inasistencia.
+    </div>
+
+    <div class="row" style="gap:10px;margin-top:16px">
+      <button class="btn btn-s" data-close style="flex:1">Cancelar</button>
+      <button class="btn btn-p" id="lic-form-guardar" style="flex:2">Guardar Solicitud ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CONFIRMACIÓN BORRAR TODOS -->
+<div class="overlay" id="m-borrar-todos">
+  <div class="sheet"><div class="grab"></div>
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <h3>Vaciar Nómina</h3>
+      <button class="icon-btn btn-sm" data-close>✕</button>
+    </div>
+    <div class="danger-box">
+      <div style="font-size:36px;margin-bottom:6px">⚠️</div>
+      <h4 style="color:var(--coral);font-weight:800;font-size:16px">¿Eliminar todos los estudiantes?</h4>
+      <p style="color:var(--ink);font-size:13.5px;margin-top:6px">Estás a punto de borrar a los <b id="bta-count">0</b> estudiantes matriculados en <b id="bta-materia">este curso</b>.</p>
+    </div>
+    <div class="row" style="gap:10px;margin-top:16px">
+      <button class="btn btn-s" data-close style="flex:1">Cancelar</button>
+      <button class="btn btn-danger" id="bta-confirm" style="flex:2">🗑 Sí, vaciar nómina</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<script src="app.js?v=5.0"></script>
+</body>
+</html>
