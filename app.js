@@ -190,17 +190,24 @@ let modoImportacionMerge = 'append';
 
 /* ═══════════════════════════════════════════════════════════
    ATRIL 5.0: SUPABASE PRODUCTION CLOUD ENGINE
-   - Proyecto: avpdyesbyzxterlfxsou
-   - Base de Datos: PostgreSQL + Realtime Engine
-   - Modo: Producción Integrada (Zero-Config para el usuario)
+   - Arquitectura Segura con Variables de Entorno
+   - Inyección en Build (Netlify/CI) + config.js local (protegido por .gitignore)
    - Sincronización Dual: Snapshot JSONB (0ms) + Persistencia Relacional
    ═══════════════════════════════════════════════════════════ */
 
-const SUPABASE_CONFIG = {
-  url: "https://avpdyesbyzxterlfxsou.supabase.co",
-  anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2cGR5ZXNieXp4dGVybGZ4c291Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyODczNDgsImV4cCI6MjA1Njg2MzM0OH0.c1e8gT-r4pL0mN8qY7sX5zK9wJ1vB3dE2aF4hG6iH0k",
-  autoSync: true
+const getSupabaseConfig = () => {
+  const env = (typeof window !== 'undefined' && window.__ENV__) || {};
+  const localCfg = (typeof window !== 'undefined' && window.ATRIL_CONFIG) || {};
+  const proc = (typeof process !== 'undefined' && process.env) || {};
+
+  return {
+    url: env.SUPABASE_URL || localCfg.SUPABASE_URL || proc.SUPABASE_URL || "https://avpdyesbyzxterlfxsou.supabase.co",
+    anonKey: env.SUPABASE_ANON_KEY || localCfg.SUPABASE_ANON_KEY || proc.SUPABASE_ANON_KEY || "",
+    autoSync: true
+  };
 };
+
+const SUPABASE_CONFIG = getSupabaseConfig();
 
 const SB = {
   initialized: false,
@@ -213,7 +220,13 @@ const SB = {
     try {
       if (typeof supabase === 'undefined' || !supabase.createClient) {
         console.warn('⚡ Supabase JS SDK no disponible en el cliente.');
-        this.updateStatusBadge('err');
+        this.updateStatusBadge('offline');
+        return false;
+      }
+
+      if (!SUPABASE_CONFIG.url || !SUPABASE_CONFIG.anonKey) {
+        console.warn('🔒 [ATRIL Security] Claves de Supabase no configuradas o vacías. Operando en modo de almacenamiento local protegido.');
+        this.updateStatusBadge('offline');
         return false;
       }
 
@@ -229,7 +242,7 @@ const SB = {
         this.startRealtimeListener();
       }
 
-      console.log('⚡ Supabase 5.0 (PostgreSQL + Realtime) conectado exitosamente.');
+      console.log('⚡ Supabase 5.0 (PostgreSQL + Realtime) conectado de forma segura.');
       return true;
     } catch (err) {
       console.error('⚡ Error inicializando Supabase:', err);
